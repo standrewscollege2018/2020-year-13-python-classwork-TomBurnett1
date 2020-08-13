@@ -90,7 +90,7 @@ for course in course_list:
     course_btn.bg = (129, 217, 222)
     course_btn.text_color = (255, 255, 255)
 
-
+demo_btn = PushButton(app, grid=[0,4])
 
 
 # start the program
