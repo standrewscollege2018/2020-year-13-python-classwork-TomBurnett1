@@ -70,6 +70,7 @@ def food_details(cname):
         if food.get_availibilty() == 0:
             if food.get_course() == cname:
                 food_listbox.append(food.get_name())
+                food_listbox.append(food.get_price())
 
 
 def add_food(name):
@@ -80,7 +81,6 @@ def add_food(name):
             # appeneding the food name to the order listbox
             ordered_list.append(food)
             order_listbox.append(food.get_name())
-
 
 def clear_order():
     ''' Clear the listbox'''
@@ -100,6 +100,15 @@ def update_order_listbox():
     for food in ordered_list:
         order_listbox.append(food.get_name())
 
+def finish_order():
+    finalise_order = app.yesno("Are you done?", "Are you finished with your order")
+    if finalise_order == True:
+        print("Fin")
+    else:
+        print("No")
+
+
+
 def admin_access():
 
     '''This brings up a password for the user and if correct, grants access to admin'''
@@ -113,6 +122,28 @@ def admin_access():
     else:
         # error for the admin if they enter the wrong password so they are told that it was incorrect and they need to reenter their password
         app.error("WRONG BOY!", "The password was wrong")
+
+
+def admin_food_details(cname):
+    ''' Print class code, class list and count of students.'''
+ 
+    # Clear the listbox first
+    admin_food_listbox.clear()
+    # Loop through all food and find the one whose name matches the one we selected
+    for food in food_list:
+        if food.get_course() == cname:
+            admin_food_listbox.append(food.get_name())
+
+
+
+def admin_functions(name):
+    admin_choice = app.question("Hol Up?", "What would you like to do: Type delete to delete the food from the menu or type change to change the availability of the selected food")
+    if admin_choice == "delete":
+        print("Deleted")
+    elif admin_choice == "change":
+        print("Changed")
+    else:
+        app.error("WHAYMINUTE!", "THATS NOT EITHER (*Michael Grunt*)")
 
 
 
@@ -144,9 +175,11 @@ fbox = Box(app, grid=[1,0])
 # box for the orders that the waiter has selected to display in.
 # also the buttons to clear and order
 obox = Box(app, grid=[2,0])
+
+afbox = Box(admin_tab, grid=[0,3])
  
- 
- 
+
+
 # This section has the GUI widgets in the cbox area
  
 # Loop through the course_list and create a button for each one
@@ -167,7 +200,22 @@ food_listbox.update_command(add_food)
 order_listbox = ListBox(obox)
 delete_button = PushButton(obox, text="Undo", command=undo)
 clear_button = PushButton(obox, text="Clear", command=clear_order)
-cost_lbl = Text(obox, text="Total Cost: total_cost") 
+finish_button = PushButton(obox, text="Finish", command=finish_order)
+cost_lbl = Text(obox, text="Total Cost: total_cost")
+
+
+
+for course in course_list:
+    course_btn = PushButton(afbox, text=course.get_cname(), width=10, height=3)
+    course_btn.bg = (129, 217, 222)
+    course_btn.text_color = (255, 255, 255)
+    course_btn.update_command(admin_food_details, [course.get_cname()])
+
+admin_food_listbox = ListBox(afbox)
+admin_food_listbox.update_command(admin_functions)
+
+
+
 
 
 # start the program
