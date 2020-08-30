@@ -6,13 +6,13 @@ class Food:
     ''' In the menu each food item is assigned to a type of food it is on the
     the menu. '''
  
-    def __init__(self, name, price, course, availibilty):
+    def __init__(self, name, price, course, availability):
         ''' Set the attributes of the menu. '''
  
         self._name = name
         self._price = price
         self._course = course
-        self._availibilty = availibilty
+        '''self._availabilty = availability'''
  
         # add food to the list
         food_list.append(self)
@@ -29,15 +29,20 @@ class Food:
         ''' Return the course of the food item'''
         return self._course
  
-    def get_availibilty(self):
-        ''' Return the availibilty of the selected food item'''
-        return self._availibilty
+    '''def get_availability(self):
+        Return the availibilty of the selected food item
+        return self._availability
  
+    def set_availability(self):
+        if self._availability == 0:
+            self._availability = 1
+        else:
+            self._availability == 0'''
  
 class Course:
     ''' Class for the course that food can be assigned too '''
  
-    def __init__(self, cname):
+    def __init__(self, cname): 
  
         self._cname = cname
         # add course to the list
@@ -54,9 +59,9 @@ def generate_food():
  
     import csv
     with open('TomsGarage.csv', newline='') as csvfile:
-              filereader = csv.reader(csvfile)
-              for line in filereader:
-                  Food(line[0], int(line[1]), line[2], int(line[3]))
+        filereader = csv.reader(csvfile)
+        for line in filereader:
+            Food(line[0], int(line[1]), line[2], int(line[3]))
  
  
  
@@ -67,38 +72,56 @@ def food_details(cname):
     food_listbox.clear()
     # Loop through all food and find the one whose name matches the one we selected
     for food in food_list:
-        if food.get_availibilty() == 0:
-            if food.get_course() == cname:
-                food_listbox.append(food.get_name())
-                food_listbox.append(food.get_price())
+        if food.get_course() == cname:
+            food_listbox.append(food.get_name())
 
 
 def add_food(name):
     '''Adds selected food to final order box'''
+
+
+    
     # loop through all food and find the one who's name matches the one that we selected
     for food in food_list:
         if food.get_name() == name:
             # appeneding the food name to the order listbox
             ordered_list.append(food)
-            order_listbox.append(food.get_name())
+            foodprice = (food.get_name() + " - $" + str(food.get_price()))
+            order_listbox.append(foodprice)
+    update_total_price()
+
+def update_total_price():
+    total_price = 0
+    for f in ordered_list:
+        total_price += f.get_price()
+    cost_lbl.value = "Total price: " + str(total_price)
+   
+            
 
 def clear_order():
     ''' Clear the listbox'''
     order_listbox.clear()
+    del ordered_list[:]
+    update_total_price()
 
 def undo():
     ''' Undo the last order that was appended to the list '''
     # deleting the last item that was appended to the list
-    del ordered_list[-1]
+    if len(ordered_list)==0:
+        print("Nothing to undo")
+    else:
+        del ordered_list[-1]
     # updating the listbox to redisplay the context of the listbox
     update_order_listbox()
+    update_total_price()
 
 
 def update_order_listbox():
     order_listbox.clear()
     # note: need to clear cost of order also
     for food in ordered_list:
-        order_listbox.append(food.get_name())
+        foodprice = (food.get_name() + " - $" + str(food.get_price()))
+        order_listbox.append(foodprice)
 
 def finish_order():
     finalise_order = app.yesno("Are you done?", "Are you finished with your order")
@@ -125,33 +148,50 @@ def admin_access():
 
 
 def admin_food_details(cname):
-    ''' Print class code, class list and count of students.'''
+    '''Print class code, class list and count of students.'''
  
     # Clear the listbox first
-    admin_food_listbox.clear()
+    admin_listbox_available.clear()
+    admin_listbox_unavailable.clear()
     # Loop through all food and find the one whose name matches the one we selected
     for food in food_list:
         if food.get_course() == cname:
-            admin_food_listbox.append(food.get_name())
+            admin_listbox_available.append(food.get_name())
 
 
-
-def admin_functions(name):
-    admin_choice = app.question("Hol Up?", "What would you like to do: Type delete to delete the food from the menu or type change to change the availability of the selected food")
+'''def admin_functions(name):
+    admin_choice = admin_tab.question("Hol Up?", "What would you like to do: Type delete to delete the food from the menu or type change to change the availability of the selected food")
     if admin_choice == "delete":
         print("Deleted")
     elif admin_choice == "change":
         print("Changed")
     else:
-        app.error("WHAYMINUTE!", "THATS NOT EITHER (*Michael Grunt*)")
+        app.error("WHAYMINUTE!", "THATS NOT EITHER!")'''
 
+def admin_add_food():
+    ''' Add new food using details entered. '''
 
+    if name_text.value == "" or price_int.value == "" or course_text.value == "":
+        success_lbl.text_color = (230,50,10)
+        success_lbl.value = "Please complete all fields"
+        # error(title, text)
+        error("ERROR!", "Please complete all fields!")
+
+    else:
+        Food(name_text.value, price_int.value, course_text.value)
+        success_lbl.text_color = (30,230,15)
+        success_lbl.value = "New Food added"
+        name_text.clear()
+        price_int.clear()
+        course_text.clear()
 
 
 food_list = []
 course_list = []
 ordered_list = []
- 
+
+
+
 # add courses 
 Course("Starter")
 Course("Main")
@@ -176,9 +216,16 @@ fbox = Box(app, grid=[1,0])
 # also the buttons to clear and order
 obox = Box(app, grid=[2,0])
 
-afbox = Box(admin_tab, grid=[0,3])
+# Admin row 1
+aabox = Box(admin_tab, grid=[1,0])
+abbox = Box(admin_tab, grid=[2,0])
+acbox = Box(admin_tab, grid=[3,0])
  
+# Admin row 2
 
+adbox = Box(admin_tab, grid=[1,1])
+aebox = Box(admin_tab, grid=[2,1])
+afbox = Box(admin_tab, grid=[3,1])
 
 # This section has the GUI widgets in the cbox area
  
@@ -197,24 +244,33 @@ admin_button.text_color = (255, 255, 255)
 
 food_listbox = ListBox(fbox)
 food_listbox.update_command(add_food)
-order_listbox = ListBox(obox)
+order_listbox = ListBox(obox, width=200, height=200)
 delete_button = PushButton(obox, text="Undo", command=undo)
 clear_button = PushButton(obox, text="Clear", command=clear_order)
 finish_button = PushButton(obox, text="Finish", command=finish_order)
-cost_lbl = Text(obox, text="Total Cost: total_cost")
+cost_lbl = Text(obox, text="Total Cost:")
 
+success_lbl = Text(afbox)
 
 
 for course in course_list:
-    course_btn = PushButton(afbox, text=course.get_cname(), width=10, height=3)
+    course_btn = PushButton(aabox, text=course.get_cname(), width=10, height=3)
     course_btn.bg = (129, 217, 222)
     course_btn.text_color = (255, 255, 255)
     course_btn.update_command(admin_food_details, [course.get_cname()])
 
-admin_food_listbox = ListBox(afbox)
-admin_food_listbox.update_command(admin_functions)
+admin_listbox_available = ListBox(abbox)
+admin_listbox_unavailable = ListBox(acbox)
 
-
+# This section has the GUI widgets in the admin_add_food area
+heading = Text(aebox, text="Add new Food")
+name_lbl = Text(aebox, text="Name")
+name_text = TextBox(aebox)
+price_lbl = Text(aebox, text="Price")
+price_text = TextBox(aebox)
+course_lbl = Text(aebox, text="Course")
+course_text = TextBox(aebox)
+add_button = PushButton(aebox, text="Add Food", width=20,command=admin_add_food)
 
 
 
