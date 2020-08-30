@@ -109,15 +109,18 @@ def update_total_price():
 
 def clear_order():
     ''' Clear the listbox'''
-    order_listbox.clear()
-    del ordered_list[:]
-    update_total_price()
+    if len(ordered_list)==0:
+        error("Error", "There is nothing in the order to clear")
+    else:
+        order_listbox.clear()
+        del ordered_list[:]
+        update_total_price()
 
 def undo():
     ''' Undo the last order that was appended to the list '''
     # deleting the last item that was appended to the list
     if len(ordered_list)==0:
-        print("Nothing to undo")
+        error("Error", "There is nothing in the order to undo")
     else:
         del ordered_list[-1]
     # updating the listbox to redisplay the context of the listbox
@@ -132,25 +135,34 @@ def update_order_listbox():
         foodprice = (food.get_name() + " - $" + str(food.get_price()))
         order_listbox.append(foodprice)
 
-def finish_order(foodprice):
+def finish_order():
+    total_price = 0
+    for f in ordered_list:
+        total_price += f.get_price()
+
     if len(ordered_list)==0:
         error("Error", "There is nothing in the order to complete")
     else:
         finalise_order = app.yesno("Are you done?", "Are you finished with your order")
         if finalise_order == True:
+            for food in ordered_list:
+                name =food.get_name()
+                price = food.get_price()
+
+
             '''Add new food using details entered. '''
             import csv
             with open('TomsGarage_Reciept.csv', 'w') as csvfile:
-                fieldnames = ['Food']
+                fieldnames = ['name', 'price', 'totalprice']
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-                writer.writerow({'Food': foodprice})
+                writer.writerow({'name': name, 'price': price, 'totalprice': total_price})
             ordered_list.clear()
             order_listbox.clear()
 
-           
+        
         else:
-            print("No")
+            None
 
 
 
@@ -160,7 +172,7 @@ def admin_access():
     
     admin_password = app.question("Wait a minute...", "Please enter your password")
 
-    if admin_password == "pass":
+    if admin_password == "wagamamas":
         # showing the admin tab where the admin only has access to so they can add, delete and change the availiblity of items
         admin_tab.show()
 
@@ -215,12 +227,30 @@ def admin_add_food():
         course_text.clear()
 
 
+def admin_delete_food():
+    '''Deletes an item off the menu.'''
+    
+    if admin_listbox_available.value == None:
+        delete_lbl.text_color = (230,50,10)
+        delete_lbl.value = "Please select a food item to delete"
+        # error pop up message
+        error("ERROR!:", "Please select a food item to delete")
+    else:
+        # check if they really want to delete the selected student using a yes or no popup 
+        check_delete = yesno("ALERT!", "Are you sure you want to delete this food item?")
+        if check_delete == True:
+            # Get the index of the food item we are deleting (position in ordered_list)
+            i = food_list.index(food_list.value)
+            # delete the objects from student names and student list
+            del(food[i])
+            delete_lbl.text_color = (210, 45, 17)
+            delete_lbl.value = "Food item has been deleted"
+
 
 
 food_list = []
 course_list = []
 ordered_list = []
-
 
 
 # add courses 
@@ -251,6 +281,7 @@ obox = Box(app, grid=[2,0])
 aabox = Box(admin_tab, grid=[1,0])
 abbox = Box(admin_tab, grid=[2,0])
 acbox = Box(admin_tab, grid=[3,0])
+agbox = Box(admin_tab, grid=[4,0])
  
 # Admin row 2
 
@@ -301,7 +332,10 @@ price_lbl = Text(aebox, text="Price")
 price_text = TextBox(aebox)
 course_lbl = Text(aebox, text="Course")
 course_text = TextBox(aebox)
-add_button = PushButton(aebox, text="Add Food", width=20,command=admin_add_food)
+add_btn = PushButton(aebox, text="Add Food", width=20,command=admin_add_food)
+delete_btn = PushButton(agbox, text="Delete", width=5,command=admin_delete_food)
+delete_lbl = Text(agbox)
+availability_btn = PushButton(agbox, text="Change", width=5)
 
 
 
