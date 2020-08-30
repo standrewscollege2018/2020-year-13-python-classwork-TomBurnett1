@@ -1,13 +1,6 @@
-Steak Burger,8,Main,0
-Chicken Burger,20,Main,0
-Egg Burger,18,Main,1
-Meat Lovers Pizza,22,Main,0
-Cheese Pizza,20,Main,0
-Steak with Salad,23,Main,0
-Chicken with Salad,23,Main,0
-Icecream,8,Dessert,0
-Banana Cake,10,Dessert,0
-Chocolate Cake,10,Dessert,1
-Fudge,6,Dessert,0
-Noodles,7,Starter,0
-Fish w fries,6,Starter,0
+Noodle,10,Starter,0
+Fish,15,Starter,0
+Lunch,13,Main,0
+Brunch,5,Main,0
+Dinner,1,Dessert,0
+Baws,8,Dessert,0

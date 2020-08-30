@@ -62,7 +62,16 @@ def generate_food():
         filereader = csv.reader(csvfile)
         for line in filereader:
             Food(line[0], int(line[1]), line[2], int(line[3]))
- 
+
+
+
+'''def append_list_as_row(row_contents):
+    # Open file in append mode
+    with open(TomsGarage.csv, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+        csv_writer = writer(write_obj)
+        # Add contents of list as last row in the csv file
+        csv_writer.writerow(row_contents)'''
  
  
 def food_details(cname):
@@ -94,7 +103,7 @@ def update_total_price():
     total_price = 0
     for f in ordered_list:
         total_price += f.get_price()
-    cost_lbl.value = "Total price: " + str(total_price)
+    cost_lbl.value = "Total price: $" + str(total_price)
    
             
 
@@ -123,12 +132,25 @@ def update_order_listbox():
         foodprice = (food.get_name() + " - $" + str(food.get_price()))
         order_listbox.append(foodprice)
 
-def finish_order():
-    finalise_order = app.yesno("Are you done?", "Are you finished with your order")
-    if finalise_order == True:
-        print("Fin")
+def finish_order(foodprice):
+    if len(ordered_list)==0:
+        error("Error", "There is nothing in the order to complete")
     else:
-        print("No")
+        finalise_order = app.yesno("Are you done?", "Are you finished with your order")
+        if finalise_order == True:
+            '''Add new food using details entered. '''
+            import csv
+            with open('TomsGarage_Reciept.csv', 'w') as csvfile:
+                fieldnames = ['Food']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+                writer.writerow({'Food': foodprice})
+            ordered_list.clear()
+            order_listbox.clear()
+
+           
+        else:
+            print("No")
 
 
 
@@ -171,19 +193,28 @@ def admin_food_details(cname):
 def admin_add_food():
     ''' Add new food using details entered. '''
 
-    if name_text.value == "" or price_int.value == "" or course_text.value == "":
+    if name_text.value == "" or price_text.value == "" or course_text.value == "":
         success_lbl.text_color = (230,50,10)
         success_lbl.value = "Please complete all fields"
         # error(title, text)
         error("ERROR!", "Please complete all fields!")
 
     else:
-        Food(name_text.value, price_int.value, course_text.value)
+
+        import csv
+        with open('TomsGarage.csv', 'w') as csvfile:
+            fieldnames = ['Name', 'Price', 'Course', 'Availability']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writerow({'Name': name_text.value, 'Price': price_text.value, 'Course': course_text.value, 'Availability': 0})
+
         success_lbl.text_color = (30,230,15)
         success_lbl.value = "New Food added"
         name_text.clear()
-        price_int.clear()
+        price_text.clear()
         course_text.clear()
+
+
 
 
 food_list = []
