@@ -1,3 +1,4 @@
+#Got any gym tips Sir?
 ''' This program is a ordering system for staff to use to add food and drink
 to a tab that adds the number of items and charges the total price to the user
 '''
@@ -5,15 +6,15 @@ to a tab that adds the number of items and charges the total price to the user
 class Food:
     ''' In the menu each food item is assigned to a type of food it is on the
     the menu. '''
- 
+    #each food has a name, a price, belongs to a course, and also has an availability
     def __init__(self, name, price, course, availability):
         ''' Set the attributes of the menu. '''
  
         self._name = name
         self._price = price
         self._course = course
-        '''self._availabilty = availability'''
- 
+        self._availability = availability
+        print(self._availability)
         # add food to the list
         food_list.append(self)
  
@@ -29,19 +30,20 @@ class Food:
         ''' Return the course of the food item'''
         return self._course
  
-    '''def get_availability(self):
-        Return the availibilty of the selected food item
+    def get_availability(self):
+        ''' Return the availibilty of the selected food item. '''
         return self._availability
  
     def set_availability(self):
         if self._availability == 0:
             self._availability = 1
         else:
-            self._availability == 0'''
+            self._availability = 0
+
  
 class Course:
     ''' Class for the course that food can be assigned too '''
- 
+    #each course has a name to it
     def __init__(self, cname): 
  
         self._cname = cname
@@ -56,11 +58,13 @@ class Course:
  
 def generate_food():
     ''' Import the csv file that stores all the food items'''
- 
+    #imports the csv and opens it thus bringing in the information we need
+    #how many days do you gym Sir?
     import csv
     with open('TomsGarage.csv', newline='') as csvfile:
         filereader = csv.reader(csvfile)
         for line in filereader:
+            #Each line represents a coloumn in the csv file, 
             Food(line[0], int(line[1]), line[2], int(line[3]))
 
 
@@ -81,30 +85,34 @@ def food_details(cname):
     food_listbox.clear()
     # Loop through all food and find the one whose name matches the one we selected
     for food in food_list:
-        if food.get_course() == cname:
+        if food.get_course() == cname and food.get_availability() == 0:
             food_listbox.append(food.get_name())
 
 
 def add_food(name):
-    '''Adds selected food to final order box'''
-
-
-    
+    '''Adds selected food to final order box'''    
     # loop through all food and find the one who's name matches the one that we selected
     for food in food_list:
         if food.get_name() == name:
             # appeneding the food name to the order listbox
             ordered_list.append(food)
+            #creates a variable for displaying purposes, it takes the name and the price and formats it in a nice display ( Food - $xxx )
+            #Yo seriously how much can you bench Sir?
             foodprice = (food.get_name() + " - $" + str(food.get_price()))
+            #adds the vaariable to our order listbox
             order_listbox.append(foodprice)
+    #runs an functions to keep the total price correct with what was ordered.
     update_total_price()
 
+
 def update_total_price():
+    #This function keeps the price of the order accurate, it takes each price of food added to the final order listbox and adds it to a total.
+    #Starts the price as 0 as to simulate nothing in the order
     total_price = 0
+    #for each food in the listbox, the function will loop through until the list is fully looped
     for f in ordered_list:
         total_price += f.get_price()
     cost_lbl.value = "Total price: $" + str(total_price)
-   
             
 
 def clear_order():
@@ -145,18 +153,19 @@ def finish_order():
     else:
         finalise_order = app.yesno("Are you done?", "Are you finished with your order")
         if finalise_order == True:
+            new_order = [total_price]
             for food in ordered_list:
-                name =food.get_name()
-                price = food.get_price()
+                new_order.append(food.get_name())
+ 
 
 
             '''Add new food using details entered. '''
             import csv
-            with open('TomsGarage_Reciept.csv', 'w') as csvfile:
-                fieldnames = ['name', 'price', 'totalprice']
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            with open('TomsGarage_Reciept.csv', 'a', newline='') as csvfile:
+                
+                writer = csv.writer(csvfile)
 
-                writer.writerow({'name': name, 'price': price, 'totalprice': total_price})
+                writer.writerow(new_order)
             ordered_list.clear()
             order_listbox.clear()
 
@@ -185,12 +194,14 @@ def admin_food_details(cname):
     '''Print class code, class list and count of students.'''
  
     # Clear the listbox first
-    admin_listbox_available.clear()
-    admin_listbox_unavailable.clear()
+    admin_update_listboxes()
     # Loop through all food and find the one whose name matches the one we selected
     for food in food_list:
         if food.get_course() == cname:
-            admin_listbox_available.append(food.get_name())
+            if food.get_availability() == 0:
+                admin_listbox_available.append(food.get_name())
+            else:
+                admin_listbox_unavailable.append(food.get_name())
 
 
 '''def admin_functions(name):
@@ -213,12 +224,14 @@ def admin_add_food():
 
     else:
 
+        Food(name_text.value, price_text.value, course_text.value, 1)
+        new_item = [name_text.value, price_text.value, course_text.value, 1]
         import csv
-        with open('TomsGarage.csv', 'w') as csvfile:
-            fieldnames = ['Name', 'Price', 'Course', 'Availability']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        with open('TomsGarage.csv', 'a') as csvfile:
 
-            writer.writerow({'Name': name_text.value, 'Price': price_text.value, 'Course': course_text.value, 'Availability': 0})
+            writer = csv.writer(csvfile)
+
+            writer.writerow(new_item)
 
         success_lbl.text_color = (30,230,15)
         success_lbl.value = "New Food added"
@@ -240,11 +253,64 @@ def admin_delete_food():
         check_delete = yesno("ALERT!", "Are you sure you want to delete this food item?")
         if check_delete == True:
             # Get the index of the food item we are deleting (position in ordered_list)
-            i = food_list.index(food_list.value)
+            i=0
+            for food in food_list:
+                if food.get_name() == admin_listbox_available.value:   
+                    del food_list[i]
+                else:
+                    i += 1
             # delete the objects from student names and student list
-            del(food[i])
+            
+            import csv
+            with open('TomsGarage.csv', 'w', newline='') as csvfile:
+
+                writer = csv.writer(csvfile)
+                for f in food_list:
+                    new_item = [f.get_name(), f.get_price(), f.get_course(), f.get_availability()]
+                    writer.writerow(new_item)
             delete_lbl.text_color = (210, 45, 17)
             delete_lbl.value = "Food item has been deleted"
+            admin_update_listboxes()
+
+def admin_change_availability():
+    ''' Change availability of selected item. '''
+
+    if admin_listbox_available.value == None and admin_listbox_unavailable.value == None:
+        delete_lbl.text_color = (230,50,10)
+        delete_lbl.value = "Please select a food item to change"
+        # error pop up message
+        error("ERROR!:", "Please select a food item to delete")
+    elif admin_listbox_available.value != None:
+        for food in food_list:
+            if food.get_name() == admin_listbox_available.value:   
+                food.set_availability()
+                import csv
+                with open('TomsGarage.csv', 'w', newline='') as csvfile:
+
+                    writer = csv.writer(csvfile)
+                    for f in food_list:
+                        new_item = [f.get_name(), f.get_price(), f.get_course(), f.get_availability()]
+                        writer.writerow(new_item)
+                admin_update_listboxes()
+    else:
+        for food in food_list:
+            if food.get_name() == admin_listbox_unavailable.value:   
+                    food.set_availability()
+                    
+                    import csv
+                    with open('TomsGarage.csv', 'w', newline='') as csvfile:
+
+                        writer = csv.writer(csvfile)
+                        for f in food_list:
+                            new_item = [f.get_name(), f.get_price(), f.get_course(), f.get_availability()]
+                            writer.writerow(new_item)
+                    admin_update_listboxes()
+
+def admin_update_listboxes():
+    ''' Update the available and unavailable listboxes. '''
+
+    admin_listbox_available.clear()
+    admin_listbox_unavailable.clear()
 
 
 
@@ -253,7 +319,7 @@ course_list = []
 ordered_list = []
 
 
-# add courses 
+# add courses
 Course("Starter")
 Course("Main")
 Course("Dessert")
@@ -273,8 +339,7 @@ cbox = Box(app, grid=[0,0])
 # box for the displayed food to sit inside
 # also the admin button for a user to gain admin privilages
 fbox = Box(app, grid=[1,0])
-# box for the orders that the waiter has selected to display in.
-# also the buttons to clear and order
+# box for the orders that the waiter has selected to display in, also the buttons to clear and order  
 obox = Box(app, grid=[2,0])
 
 # Admin row 1
@@ -331,11 +396,15 @@ name_text = TextBox(aebox)
 price_lbl = Text(aebox, text="Price")
 price_text = TextBox(aebox)
 course_lbl = Text(aebox, text="Course")
-course_text = TextBox(aebox)
+course_text = Combo(aebox, options=['Starter','Main','Dessert'])
 add_btn = PushButton(aebox, text="Add Food", width=20,command=admin_add_food)
-delete_btn = PushButton(agbox, text="Delete", width=5,command=admin_delete_food)
+
+
+delete_btn = PushButton(agbox, text="Delete", width=5, command=admin_delete_food)
+
+
 delete_lbl = Text(agbox)
-availability_btn = PushButton(agbox, text="Change", width=5)
+availability_btn = PushButton(agbox, text="Change", width=5, command=admin_change_availability)
 
 
 
